@@ -1,17 +1,13 @@
-//executar no play.golang.org
 package main
+
 import (
-	"fmt"
-	"sync"
-	"time"
-	"os"
+    "fmt"
+    "sync"
+    "time"
 )
 
-var qte_fil = 5 //quantidade de filósofos
-var count = 0
-
-type garfo struct{ 
-	sync.Mutex 
+type garfo struct{
+	sync.Mutex
 }
 
 type filosofo struct{
@@ -19,45 +15,40 @@ type filosofo struct{
 	garfo_esq, garfo_dir *garfo
 }
 
-func (f filosofo) comer(){	
+func(f *filosofo) comer(){
 	f.garfo_esq.Lock()
+	fmt.Printf("Filosofo #%d esta pegou o garfo esquerdo\n", f.id)
+	time.Sleep(time.Second)
 	f.garfo_dir.Lock()
-
-	fmt.Printf("Filosofo #%d esta comendo \n", f.id)
-	time.Sleep(time.Second)
-
-	f.garfo_dir.Unlock()
+	fmt.Printf("Filosofo #%d esta pegou o garfo direito\n", f.id)
+	
+	fmt.Printf("Filosofo #%d esta comendo...\n", f.id)
+	
+	time.Sleep(time.Second*2)
+	
+	fmt.Printf("Filosofo #%d terminou de comer!\n", f.id)
+	
 	f.garfo_esq.Unlock()
-
-	fmt.Printf("Filosofo #%d terminou de comer \n", f.id)
-	time.Sleep(time.Second)
-
-	if count<qte_fil-1 {
-		count++
-	} else {
-		os.Exit(0)
-	}
+	f.garfo_dir.Unlock()
 }
 
+func main(){
+	garfos := make([]*garfo, 5)
+	filosofos := make([]*filosofo, 5)
 
-func main() {
-	
-	garfos := make([]*garfo, qte_fil)
-	for i := 0; i < qte_fil; i++{
-		garfos[i] = new(garfo)
+	for i:= 0; i < 5; i++{
+		garfos[i] = &garfo{}
 	}
 
-	filosofos := make([]*filosofo, qte_fil)
-	for i := 0; i < qte_fil; i++{
+	for i:= 0; i < 5; i++{
 		filosofos[i] = &filosofo{
-			id: i, garfo_esq: garfos[i], garfo_dir: garfos[(i+1)%qte_fil]}
+			id: i,
+			garfo_esq: garfos[i],
+			garfo_dir: garfos[(i+1)%5],
+		}
 		go filosofos[i].comer()
 	}
-	
-	filosofos_comem := make(chan int, 1)
-	<- filosofos_comem 
-	// abre o canal
-	
+
+	jantar_filos := make(chan int)
+	<- jantar_filos
 }
-
-
